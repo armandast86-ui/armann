@@ -52,7 +52,8 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-white/95 backdrop-blur">
+    <>
+      <header className="sticky top-0 z-40 border-b border-line bg-white/95 backdrop-blur">
       <div className="container-page flex items-center justify-between gap-4 py-3">
         {/* Brand */}
         <Link to="/" className="flex shrink-0 flex-col leading-tight">
@@ -206,7 +207,12 @@ export default function Header() {
         </div>
       )}
 
-      {/* Mobile drawer — slides in from the right, matching the reading direction */}
+      </header>
+
+      {/* Mobile drawer — slides in from the right, matching the reading direction.
+          It is rendered outside <header> on purpose: the header's `backdrop-blur`
+          makes it the containing block for fixed descendants, which would pin this
+          full-screen overlay to the header box instead of the viewport. */}
       <div
         className={`fixed inset-0 z-50 lg:hidden ${menuOpen ? '' : 'pointer-events-none'}`}
         aria-hidden={!menuOpen}
@@ -282,6 +288,6 @@ export default function Header() {
           </div>
         </aside>
       </div>
-    </header>
+    </>
   );
 }

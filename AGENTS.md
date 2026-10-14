@@ -45,6 +45,10 @@ docker compose -f docker-compose.base44.yml up -d --build
   no external font request is needed.
 - The Persian UI relies on logical CSS properties (`ms-*`, `me-*`, `ps-*`, `pe-*`,
   `text-start/end`). Use those instead of `ml-*`/`mr-*` when editing.
+- The sticky header is translucent (`bg-white/95` + `backdrop-blur`). `backdrop-filter` makes
+  the header the **containing block for `fixed` descendants**, so a full-screen overlay rendered
+  inside `<header>` collapses to the header's own ~64px box. The mobile drawer is therefore
+  rendered as a sibling *outside* `<header>` in `Header.jsx` — keep it there (or use a portal).
 - Ratings and review counts are **computed from the `reviews` table**. Seeded products
   deliberately have no reviews, so cards show no stars until a customer writes one. Do not
   reintroduce fake ratings or review counts.
