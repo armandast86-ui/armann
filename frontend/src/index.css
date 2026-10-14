@@ -1,0 +1,170 @@
+@import 'tailwindcss';
+
+/* ------------------------------------------------------------------ *
+ * آیدا بیوتی — design tokens
+ * ------------------------------------------------------------------ */
+@theme {
+  --font-sans:
+    'Vazirmatn Variable', 'Vazirmatn', 'Tahoma', system-ui, sans-serif;
+
+  --color-cream: #fbf5f5;
+  --color-blush: #e9c7cc;
+  --color-rose: #b87987;
+  --color-rose-ink: #965a68;
+  --color-burgundy: #55263f;
+  --color-ink: #282124;
+  --color-gold: #c5a36a;
+  --color-line: #eae5e5;
+
+  --radius-card: 14px;
+  --shadow-soft: 0 18px 40px -28px rgba(40, 33, 36, 0.35);
+}
+
+@layer base {
+  * {
+    font-family: var(--font-sans);
+  }
+
+  html {
+    direction: rtl;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--color-cream);
+    color: var(--color-ink);
+    text-align: right;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-weight: 700;
+    line-height: 1.35;
+    text-wrap: balance;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-burgundy);
+    outline-offset: 2px;
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    font: inherit;
+  }
+}
+
+@layer components {
+  .container-page {
+    width: 100%;
+    max-width: 120rem;
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+
+  @media (min-width: 768px) {
+    .container-page {
+      padding-inline: 2rem;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .container-page {
+      padding-inline: 3rem;
+    }
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 999px;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.25s ease;
+    cursor: pointer;
+    border: 1px solid transparent;
+  }
+
+  .btn-primary {
+    background-color: var(--color-burgundy);
+    color: #fff;
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    box-shadow: 0 0 0 2px var(--color-gold);
+  }
+
+  .btn-outline {
+    background-color: transparent;
+    border-color: var(--color-burgundy);
+    color: var(--color-burgundy);
+  }
+
+  .btn-outline:hover:not(:disabled) {
+    background-color: var(--color-burgundy);
+    color: #fff;
+  }
+
+  .btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  .field {
+    width: 100%;
+    border: 1px solid var(--color-line);
+    border-radius: 10px;
+    background-color: #fff;
+    padding: 0.7rem 0.9rem;
+    font-size: 0.9375rem;
+    transition: border-color 0.2s ease;
+  }
+
+  .field:focus {
+    border-color: var(--color-rose);
+    outline: none;
+  }
+
+  .card {
+    background-color: #fff;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+  }
+
+  /* Delicate gold rule that grows from the centre — RTL friendly. */
+  .nav-link {
+    position: relative;
+  }
+
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    inset-inline: 50%;
+    bottom: -6px;
+    height: 1px;
+    background-color: var(--color-gold);
+    transition: inset-inline 0.3s ease;
+  }
+
+  .nav-link:hover::after,
+  .nav-link[data-active='true']::after {
+    inset-inline: 0;
+  }
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

@@ -1,0 +1,101 @@
+# Base44 sandbox environment for آیدا بیوتی (Aida Beauty).
+#
+# Both application services run FROM THE CLONED SOURCE with a live-reload dev
+# command, so edits appear without rebuilding an image. Only the database is a
+# prebuilt image.
+#
+# Ports: the user-facing site is served on host port 3000. The API is not exposed
+# publicly — the Vite dev server proxies /api and /uploads to it over the compose
+# network, which keeps the session cookie first-party.
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: aida
+      POSTGRES_PASSWORD: aida_local_dev
+      POSTGRES_DB: aida_beauty
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U aida -d aida_beauty']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 5s
+    restart: on-failure
+
+  api:
+    image: node:22-bookworm-slim
+    working_dir: /app
+    # Dependencies live in a volume, so they are installed from the current
+    # lockfile at startup, after the bind mount is in place.
+    command: ['sh', '-ec', 'npm install --no-audit --no-fund && exec npm run dev']
+    volumes:
+      - ./backend:/app
+      - api-node-modules:/app/node_modules
+      - uploads:/app/uploads
+    environment:
+      - NODE_ENV=development
+      - PORT=8000
+      - DATABASE_URL=postgres://aida:aida_local_dev@db:5432/aida_beauty
+      - UPLOAD_DIR=/app/uploads
+      - BASE44_PREVIEW_MODE
+    # App secrets come from the platform-managed file outside the repo. It is the
+    # only env_file, so a dashboard value always wins over nothing else.
+    env_file:
+      - ./backend/.env.base44-defaults
+      - /run/base44/app.env
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      # Probes a real read-only endpoint of the running API.
+      test:
+        [
+          'CMD-SHELL',
+          'node -e "fetch(\"http://127.0.0.1:8000/api/settings\").then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))"',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+    restart: on-failure
+
+  web:
+    image: node:22-bookworm-slim
+    working_dir: /app
+    command: ['sh', '-ec', 'npm install --no-audit --no-fund && exec npm run dev']
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./frontend:/app
+      - web-node-modules:/app/node_modules
+    environment:
+      - NODE_ENV=development
+      - API_PROXY_TARGET=http://api:8000
+      # Passed through from the platform; Vite appends it to allowedHosts.
+      - __VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS
+      - BASE44_PREVIEW_MODE
+      - BASE44_SANDBOX_HOST_DOMAIN
+      - BASE44_PUBLIC_HOST_SUFFIX
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'node -e "fetch(\"http://127.0.0.1:3000/\").then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))"',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+    restart: on-failure
+
+volumes:
+  db-data:
+  api-node-modules:
+  web-node-modules:
+  uploads:
